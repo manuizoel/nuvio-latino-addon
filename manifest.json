@@ -1,8 +1,8 @@
 {
-  "id": "com.latino.nuvio.providers",
+  "id": "com.latino.nuvio.addon",
   "version": "1.0.0",
-  "name": "Latino Providers",
-  "description": "Proveedores de contenido latino para Nuvio",
+  "name": "Latino Nuvio",
+  "description": "Addon de streams para Nuvio",
   "catalogs": [],
   "resources": [
     {
