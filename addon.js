@@ -1,4 +1,5 @@
 const express = require("express");
+const provider = require("./providers/allpeliculasse.js");
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -35,13 +36,28 @@ app.get("/manifest.json", (req, res) => {
 });
 
 app.get("/stream/:type/:id.json", async (req, res) => {
-  console.log("Solicitud de stream:", req.params);
+  try {
+    const { type, id } = req.params;
 
-  res.json({
-    streams: []
-  });
+    let tmdbId = id.split(":")[0];
+
+    const streams = await provider.getStreams(
+      tmdbId,
+      type === "series" ? "tv" : "movie"
+    );
+
+    res.json({
+      streams: Array.isArray(streams) ? streams : []
+    });
+  } catch (error) {
+    console.error("Stream error:", error);
+
+    res.json({
+      streams: []
+    });
+  }
 });
 
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Servidor iniciado en puerto ${PORT}`);
+  console.log(`Nuvio Latino iniciado en puerto ${PORT}`);
 });
