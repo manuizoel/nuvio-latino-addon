@@ -1,14 +1,15 @@
 const express = require("express");
+const path = require("path");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+
+const PORT = process.env.PORT || 10000;
 
 const manifest = {
-  id: "com.latino.nuvio.addon",
+  id: "com.nuvio.latino.addon",
   version: "1.0.0",
-  name: "Latino Nuvio",
-  description: "Addon de streams para Nuvio",
-  catalogs: [],
+  name: "Nuvio Latino",
+  description: "Proveedores de películas y series en español latino",
   resources: [
     {
       name: "stream",
@@ -17,6 +18,7 @@ const manifest = {
     }
   ],
   types: ["movie", "series"],
+  catalogs: [],
   behaviorHints: {
     configurable: false,
     configurationRequired: false
@@ -25,9 +27,8 @@ const manifest = {
 
 app.get("/", (req, res) => {
   res.json({
-    status: "ok",
-    addon: "Latino Nuvio",
-    version: "1.0.0"
+    status: "online",
+    addon: "Nuvio Latino"
   });
 });
 
@@ -35,33 +36,6 @@ app.get("/manifest.json", (req, res) => {
   res.json(manifest);
 });
 
-app.get("/stream/:type/:id.json", async (req, res) => {
-  try {
-    const { type, id } = req.params;
-
-    console.log("Solicitud recibida:", {
-      type,
-      id
-    });
-
-    /*
-     * Aquí se conectarán únicamente proveedores
-     * autorizados para entregar los streams.
-     */
-
-    return res.json({
-      streams: []
-    });
-
-  } catch (error) {
-    console.error("Error:", error);
-
-    return res.status(500).json({
-      streams: []
-    });
-  }
-});
-
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Addon Nuvio ejecutándose en puerto ${PORT}`);
+  console.log(`Nuvio Latino iniciado en puerto ${PORT}`);
 });
