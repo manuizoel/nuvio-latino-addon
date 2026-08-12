@@ -1,0 +1,27 @@
+{
+  "id": "com.latino.nuvio.providers",
+  "version": "1.0.0",
+  "name": "Latino Providers",
+  "description": "Proveedores de contenido latino para Nuvio",
+  "catalogs": [],
+  "resources": [
+    {
+      "name": "stream",
+      "types": [
+        "movie",
+        "series"
+      ],
+      "idPrefixes": [
+        "tt"
+      ]
+    }
+  ],
+  "types": [
+    "movie",
+    "series"
+  ],
+  "behaviorHints": {
+    "configurable": false,
+    "configurationRequired": false
+  }
+}
