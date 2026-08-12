@@ -1,0 +1,13 @@
+{
+  "name": "latino-nuvio-addon",
+  "version": "1.0.0",
+  "description": "Latino providers addon for Nuvio",
+  "main": "addon.js",
+  "scripts": {
+    "start": "node addon.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "crypto-js": "^4.2.0"
+  }
+}
