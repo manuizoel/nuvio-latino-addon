@@ -1,25 +1,15 @@
-const express = require('express');
-const cors = require('cors');
-const CryptoJS = require("crypto-js");
+import CryptoJS from "crypto-js";
 
-const app = express();
-app.use(cors());
-
-// ==========================================
-// CONFIGURACIÓN
-// ==========================================
 const TMDB_API_KEY = "439c478a771f35c05022f9feabcca01c";
 const BASE_URL = "https://allpeliculas.la";
 const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+
 const HEADERS = {
     "User-Agent": USER_AGENT,
     "Accept": "application/json, text/plain, */*",
     "Connection": "keep-alive"
 };
 
-// ==========================================
-// FUNCIONES DE APOYO Y SCRAPING
-// ==========================================
 function cleanTitle(title) {
     if (!title) return "";
     return title
@@ -50,12 +40,13 @@ async function getTMDBInfo(id, type) {
     for (const lang of languages) {
         try {
             const url = `https://api.themoviedb.org/3/${tmdbType}/${id}?api_key=${TMDB_API_KEY}&language=${lang}`;
-            const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } }).then(r => r.json());
-            const title = tmdbType === "movie" ? res.title : res.name;
-            const original = tmdbType === "movie" ? res.original_title : res.original_name;
+            const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
+            const data = await res.json();
+            const title = tmdbType === "movie" ? data.title : data.name;
+            const original = tmdbType === "movie" ? data.original_title : data.original_name;
             if (title) titles.add(title);
             if (original) titles.add(original);
-            if (!year) year = (res.release_date || res.first_air_date || "").substring(0, 4);
+            if (!year) year = (data.release_date || data.first_air_date || "").substring(0, 4);
         } catch (e) {
             console.log(`[TMDB] Error (${lang}): ${e.message}`);
         }
@@ -67,7 +58,6 @@ async function searchAllPeliculas(query, type) {
     try {
         const postType = (type === "series" || type === "tv") ? "tvshows" : "movies";
         const url = `${BASE_URL}/wp-api/v1/search?filter=[]&q=${encodeURIComponent(query)}&orderBy=latest&order=desc&postType=${postType}&postsPerPage=20&page=1`;
-        console.log(`[AllPeliculas] Buscando API: ${url}`);
         const res = await fetch(url, { headers: HEADERS });
         if (!res.ok) return [];
         const data = await res.json();
@@ -502,7 +492,6 @@ async function getStreams(id, type, season, episode) {
                 if (p.type !== matchesType) return false;
                 const pTitle = cleanTitle(p.title);
                 const cleanTm = cleanTitle(title);
-                // Coincidencia flexible: si el título limpio está incluido en el de AllPeliculas o viceversa
                 return pTitle.includes(cleanTm) || cleanTm.includes(pTitle);
             });
             
@@ -511,7 +500,6 @@ async function getStreams(id, type, season, episode) {
                 break;
             }
             
-            // Fallback: buscar el primero que sea del tipo correcto
             matchedPost = posts.find(p => p.type === matchesType);
             if (matchedPost) {
                 console.log(`[DEBUG] Coincidencia por tipo encontrada: ${matchedPost.title}`);
@@ -607,61 +595,7 @@ async function getStreams(id, type, season, episode) {
     return [];
 }
 
-// ==========================================
-// ENDPOINTS DEL SERVIDOR EXPRESS
-// ==========================================
-app.get('/manifest.json', (req, res) => {
-    res.json({
-        id: "allpeliculas.latino",
-        version: "1.0.0",
-        name: "AllPeliculas Latino",
-        description: "Scraper de AllPeliculas para Nuvio",
-        resources: ["stream"],
-        types: ["movie", "series"],
-        idPrefixes: ["tt", "tmdb:"]
-    });
-});
-
-// Endpoint principal que usa Nuvio/Stremio
-app.get('/stream/:type/:id.json', async (req, res) => {
-    const { type, id } = req.params;
-    
-    // Limpieza robusta del ID
-    let cleanId = id;
-    if (id.includes(":")) {
-        cleanId = id.split(":")[1]; // Saca el "tmdb:" o "tt"
-    }
-    
-    const season = req.query.season ? parseInt(req.query.season) : null;
-    const episode = req.query.episode ? parseInt(req.query.episode) : null;
-    
-    console.log(`\n=========================================`);
-    console.log(`[PETICIÓN RECIBIDA] Tipo: ${type} | ID Original: ${id} | ID Limpio: ${cleanId} | Temp: ${season} | Epi: ${episode}`);
-    
-    try {
-        const streams = await getStreams(cleanId, type, season, episode);
-        res.json({ streams: streams });
-    } catch (error) {
-        console.error("[ERROR FATAL EN ENDPOINT]", error);
-        res.json({ streams: [] });
-    }
-});
-
-// Endpoint de respaldo (sin .json, por si acaso)
-app.get('/stream/:type/:id', async (req, res) => {
-    const { type, id } = req.params;
-    let cleanId = id.includes(":") ? id.split(":")[1] : id;
-    
-    try {
-        const streams = await getStreams(cleanId, type, req.query.season, req.query.episode);
-        res.setHeader('Content-Type', 'application/json');
-        res.json({ streams: streams });
-    } catch (error) {
-        res.json({ streams: [] });
-    }
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`🚀 Servidor AllPeliculasSE corriendo en el puerto ${PORT}`);
-});
+// Exportación por defecto para compatibilidad con Nuvio
+export default {
+    getStreams
+};
