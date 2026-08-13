@@ -1,27 +1,9 @@
 {
-  "id": "com.latino.nuvio.addon",
+  "id": "allpeliculas.latino",
   "version": "1.0.0",
-  "name": "Latino Nuvio",
-  "description": "Addon de streams para Nuvio",
-  "catalogs": [],
-  "resources": [
-    {
-      "name": "stream",
-      "types": [
-        "movie",
-        "series"
-      ],
-      "idPrefixes": [
-        "tt"
-      ]
-    }
-  ],
-  "types": [
-    "movie",
-    "series"
-  ],
-  "behaviorHints": {
-    "configurable": false,
-    "configurationRequired": false
-  }
+  "name": "AllPeliculas Latino",
+  "description": "Scraper de AllPeliculas para Nuvio",
+  "resources": ["stream"],
+  "types": ["movie", "series"],
+  "idPrefixes": ["tt", "tmdb:"]
 }
