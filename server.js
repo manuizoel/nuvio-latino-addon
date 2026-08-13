@@ -24,8 +24,10 @@ const HEADERS = {
 async function getTMDBInfo(id, type) {
     const titles = new Set();
     let year = "";
+    // Nuvio puede pasar "series" en lugar de "tv", lo estandarizamos para TMDB
     const tmdbType = type === "series" || type === "tv" ? "tv" : "movie";
     const languages = ["es-MX", "es-ES", "en-US"];
+    
     for (const lang of languages) {
         try {
             const url = `https://api.themoviedb.org/3/${tmdbType}/${id}?api_key=${TMDB_API_KEY}&language=${lang}`;
@@ -591,7 +593,13 @@ app.get('/manifest.json', (req, res) => {
 
 app.get('/stream/:type/:id.json', async (req, res) => {
     const { type, id } = req.params;
-    let cleanId = id.includes(":") ? id.split(":")[1] : id;
+    
+    // Limpiar el ID (ej: tmdb:12345 -> 12345)
+    let cleanId = id;
+    if (id.includes(":")) {
+        cleanId = id.split(":")[1];
+    }
+    
     const season = req.query.season ? parseInt(req.query.season) : null;
     const episode = req.query.episode ? parseInt(req.query.episode) : null;
     
